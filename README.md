@@ -11,11 +11,11 @@ behaviour, credit history, loans, and payment patterns — built with a
 SMOTE-balanced Random Forest model and served through a custom-themed
 Streamlit dashboard.
 
-**🔗 Live demo:** _add your Streamlit Cloud link here after deploying_
+
 
 ---
 
-## 📸 Screenshots
+
 
 | About | Data Insight | Model Performance | Prediction |
 |---|---|---|---|
@@ -94,4 +94,4 @@ This project is licensed under the MIT License — see the
 
 ## 👤 Author
 
-**Your Name** — Data Scientist
+**Mahmoud Mansour** — Data Scientist
