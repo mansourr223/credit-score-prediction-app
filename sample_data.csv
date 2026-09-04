@@ -1,0 +1,11 @@
+Age,Annual_Income,Monthly_Inhand_Salary,Num_Bank_Accounts,Num_Credit_Card,Interest_Rate,Num_of_Loan,Type_of_Loan,Delay_from_due_date,Num_of_Delayed_Payment,Changed_Credit_Limit,Num_Credit_Inquiries,Credit_Mix,Outstanding_Debt,Credit_Utilization_Ratio,Credit_History_Age,Payment_of_Min_Amount,Total_EMI_per_month,Amount_invested_monthly,Payment_Behaviour,Monthly_Balance,Occupation,Month
+35,50000,3500,2,3,5.5,2,"Auto Loan, Personal Loan",2,1,5.5,2,Good,800,35.5,240,Yes,150,200,Low_spent_Medium_value_payments,2500,Engineer,January
+42,75000,4800,3,4,6.2,3,"Credit-Builder Loan, Personal Loan",1,0,8.2,3,Good,1200,42.0,300,Yes,220,350,High_spent_Small_value_payments,3200,Teacher,March
+28,45000,3200,2,2,4.8,1,"Auto Loan",0,0,3.5,1,Standard,600,28.5,180,No,120,150,Low_spent_Large_value_payments,2800,Developer,May
+50,95000,5900,4,5,7.1,4,"Auto Loan, Home Equity Loan",3,2,10.5,4,Good,2100,58.0,360,Yes,350,500,Low_spent_Small_value_payments,4500,Lawyer,July
+31,55000,3800,2,3,5.2,2,"Personal Loan, Credit-Builder Loan",4,3,6.2,2,Poor,950,45.0,220,No,180,250,Low_spent_Small_value_payments,2200,Scientist,February
+38,68000,4500,3,4,6.0,3,"Auto Loan",1,1,7.8,3,Good,1050,40.0,280,Yes,210,300,High_spent_Medium_value_payments,3500,Entrepreneur,April
+45,82000,5200,3,4,6.5,3,"Credit-Builder Loan, Home Equity Loan",2,1,9.0,3,Good,1500,50.0,320,Yes,280,400,Low_spent_Medium_value_payments,4000,Engineer,June
+26,42000,3000,2,2,5.0,1,"Personal Loan",0,0,4.5,1,Standard,500,32.0,150,Yes,100,120,High_spent_Large_value_payments,2600,Developer,August
+55,105000,6500,4,5,7.5,5,"Auto Loan, Personal Loan, Home Equity Loan",5,4,12.0,4,Good,2500,62.0,400,No,450,650,Low_spent_Small_value_payments,5500,Lawyer,September
+33,60000,4100,2,3,5.5,2,"Auto Loan",2,2,6.5,2,Standard,900,38.0,240,Yes,170,200,Low_spent_Large_value_payments,2900,Teacher,November
