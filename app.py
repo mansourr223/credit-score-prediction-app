@@ -9,13 +9,13 @@ from theme import (
     inject_global_css, kpi_card, section_title, style_fig,
     ACCENT_1, ACCENT_2, CLASS_COLORS, PLOTLY_COLORWAY, TEXT_MUTED, CARD_BORDER
 )
-from data_utils import load_and_clean_data
+from data_utils import load_and_clean_data, clean_dataframe
 from model_results import MODEL_COMPARISON, FINAL_MODEL, TUNING_EXPERIMENT, CLASS_DISTRIBUTION
 
 # ============================================================
 # APP AUTHOR — edit this to your name / title before deploying
 # ============================================================
-APP_AUTHOR = "Mahmoud Mansour"
+APP_AUTHOR = "Your Name"
 APP_AUTHOR_TITLE = "Data Scientist"
 
 # ============================================================
@@ -231,7 +231,6 @@ def page_data_insight():
         uploaded = st.file_uploader("Upload credit__score.csv", type=["csv"])
         if uploaded is None:
             return
-        from data_utils import clean_dataframe
         df = clean_dataframe(pd.read_csv(uploaded))
 
     # ---------- KPI row ----------
@@ -622,9 +621,12 @@ def page_prediction():
         st.subheader("Batch Prediction from CSV")
         uploaded_file = st.file_uploader("Upload a CSV file with customer data", type=["csv"])
 
+        st.caption("ℹ️ Uploaded files are cleaned automatically (same pipeline as training — e.g. \"24_\" → 24, \"_______\" → missing) before scoring.")
+
         if uploaded_file is not None:
             try:
-                batch_df = pd.read_csv(uploaded_file)
+                raw_batch_df = pd.read_csv(uploaded_file)
+                batch_df = clean_dataframe(raw_batch_df)
                 st.write(f"Uploaded {len(batch_df)} records")
                 st.dataframe(batch_df.head(), use_container_width=True)
 
