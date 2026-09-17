@@ -19,6 +19,16 @@ APP_AUTHOR = "Your Name"
 APP_AUTHOR_TITLE = "Data Scientist"
 
 # ============================================================
+# BATCH PREDICTION SAFETY LIMITS
+# Free-tier deployments (~1GB RAM) can crash on very large batch
+# uploads. These caps keep memory use bounded. Raise MAX_BATCH_ROWS
+# if you're running this locally or on a bigger machine.
+# ============================================================
+MAX_BATCH_ROWS = 5000   # hard cap — larger files are trimmed
+CHUNK_SIZE = 1000       # rows scored per prediction call
+PREVIEW_ROWS = 200      # rows rendered on-screen (full data still in the CSV download)
+
+# ============================================================
 # PAGE CONFIG
 # ============================================================
 st.set_page_config(
@@ -622,29 +632,55 @@ def page_prediction():
         uploaded_file = st.file_uploader("Upload a CSV file with customer data", type=["csv"])
 
         st.caption("ℹ️ Uploaded files are cleaned automatically (same pipeline as training — e.g. \"24_\" → 24, \"_______\" → missing) before scoring.")
+        st.caption(f"⚠️ This is a free, memory-limited deployment. Batches larger than **{MAX_BATCH_ROWS:,} rows** are trimmed automatically to avoid crashing the app — for bigger jobs, run the app locally or split your file.")
 
         if uploaded_file is not None:
             try:
                 raw_batch_df = pd.read_csv(uploaded_file)
+                total_rows = len(raw_batch_df)
+
+                if total_rows > MAX_BATCH_ROWS:
+                    st.warning(
+                        f"Your file has **{total_rows:,} rows**, which is above the "
+                        f"**{MAX_BATCH_ROWS:,}-row** limit for this deployment. "
+                        f"Only the first {MAX_BATCH_ROWS:,} rows will be scored below."
+                    )
+                    raw_batch_df = raw_batch_df.head(MAX_BATCH_ROWS)
+
                 batch_df = clean_dataframe(raw_batch_df)
-                st.write(f"Uploaded {len(batch_df)} records")
-                st.dataframe(batch_df.head(), use_container_width=True)
+                st.write(f"Ready to score {len(batch_df):,} records")
+                st.dataframe(batch_df.head(PREVIEW_ROWS), use_container_width=True)
 
                 if st.button("🔮 Predict for All Customers"):
                     try:
                         batch_df_ordered = batch_df[ALL_COLS]
-                        predictions = model.predict(batch_df_ordered)
-                        probabilities = model.predict_proba(batch_df_ordered)
+                        sorted_classes = sorted(model.classes_)
+
+                        # Predict in chunks to keep peak memory flat on small deployments
+                        pred_chunks, prob_chunks = [], []
+                        progress = st.progress(0, text="Scoring batch...")
+                        n = len(batch_df_ordered)
+                        n_chunks = max(1, (n + CHUNK_SIZE - 1) // CHUNK_SIZE)
+                        for i in range(n_chunks):
+                            chunk = batch_df_ordered.iloc[i * CHUNK_SIZE:(i + 1) * CHUNK_SIZE]
+                            pred_chunks.append(model.predict(chunk))
+                            prob_chunks.append(model.predict_proba(chunk))
+                            progress.progress((i + 1) / n_chunks, text=f"Scoring batch... {min((i+1)*CHUNK_SIZE, n)}/{n}")
+                        progress.empty()
+
+                        predictions = np.concatenate(pred_chunks)
+                        probabilities = np.concatenate(prob_chunks)
 
                         results_df = batch_df.copy()
                         results_df["Predicted_Credit_Score"] = predictions
-                        sorted_classes = sorted(model.classes_)
                         for cls in sorted_classes:
                             cls_idx = list(model.classes_).index(cls)
                             results_df[f"Confidence_{cls}"] = probabilities[:, cls_idx]
 
-                        st.success("✅ Predictions completed!")
-                        st.dataframe(results_df, use_container_width=True)
+                        st.success(f"✅ Scored {len(results_df):,} customers!")
+                        if len(results_df) > PREVIEW_ROWS:
+                            st.caption(f"Showing the first {PREVIEW_ROWS:,} rows — download the CSV for the full result.")
+                        st.dataframe(results_df.head(PREVIEW_ROWS), use_container_width=True)
 
                         csv = results_df.to_csv(index=False)
                         st.download_button("📥 Download Results (CSV)", data=csv,
@@ -664,6 +700,8 @@ def page_prediction():
                         ))
                         fig.update_layout(title="Predicted Class Distribution — This Batch", yaxis_title="Count")
                         st.plotly_chart(style_fig(fig, height=320), use_container_width=True)
+
+                        del pred_chunks, prob_chunks, predictions, probabilities
 
                     except Exception as e:
                         st.error(f"Error during batch prediction: {str(e)}")
